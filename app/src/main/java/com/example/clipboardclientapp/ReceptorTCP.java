@@ -15,16 +15,16 @@ import java.util.logging.Logger;
  */
 public class ReceptorTCP extends Thread {
 
-    private final String LOCAL_IP;
-    private final String LOCAL_HOST_NAME;
+    private String LOCAL_IP;
+    private String LOCAL_HOST_NAME;
     private boolean isEnabled;
     private ServerSocket serverSocket;
     private int PORT;
     private String TEXT;
     private messageHandler caller;
-    public ReceptorTCP(int port, messageHandler caller) throws UnknownHostException{
-        this.LOCAL_IP = InetAddress.getLocalHost().getHostAddress();
-        this.LOCAL_HOST_NAME = InetAddress.getLocalHost().getHostName();
+    public ReceptorTCP(int port, messageHandler caller) throws UnknownHostException {
+        this.LOCAL_IP = "";
+        this.LOCAL_HOST_NAME = "";
         this.isEnabled = false;
         this.PORT = port;
         this.caller = caller;
@@ -58,7 +58,7 @@ public class ReceptorTCP extends Thread {
 
                             break;
                         default:
-                            System.out.println("trash");
+                            //System.out.println("trash");
 
                     }
                     OIS.close();

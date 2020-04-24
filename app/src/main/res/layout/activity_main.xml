@@ -17,14 +17,16 @@
         app:layout_constraintEnd_toStartOf="@+id/button"
         app:layout_constraintHorizontal_bias="0.268"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:autofillHints="" />
 
     <Button
         android:id="@+id/button3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="28dp"
-        android:text="copy to clipboard"
+        android:onClick="copyToClipboard"
+        android:text="@string/copy_to_clipboard"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.911"
@@ -38,7 +40,8 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="36dp"
         android:layout_marginTop="24dp"
-        android:text="update"
+        android:onClick="updateTextArea"
+        android:text="@string/update"
         app:layout_constraintEnd_toStartOf="@+id/button3"
         app:layout_constraintHorizontal_bias="0.115"
         app:layout_constraintStart_toStartOf="parent"
@@ -49,11 +52,10 @@
         android:layout_width="165dp"
         android:layout_height="95dp"
         android:layout_marginTop="119dp"
-        android:text="SEND"
+        android:text="@string/send"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.52"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/editText2"
         app:layout_constraintVertical_bias="0.0" />
@@ -61,9 +63,10 @@
     <EditText
         android:id="@+id/editText2"
         style="@android:style/Widget.Holo.Light.EditText"
-        android:layout_width="324dp"
-        android:layout_height="228dp"
+        android:layout_width="334dp"
+        android:layout_height="172dp"
         android:layout_marginTop="44dp"
+        android:autofillHints=""
         android:backgroundTint="#BEA6A6"
         android:ems="10"
         android:gravity="start|top"
@@ -82,7 +85,8 @@
         android:layout_height="47dp"
         android:layout_marginTop="60dp"
         android:layout_marginEnd="28dp"
-        android:text="SYNC"
+        android:onClick="sync"
+        android:text="@string/sync"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="SYNC" />
@@ -91,8 +95,28 @@
         android:id="@+id/switch1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="visible"
-        tools:layout_editor_absoluteX="37dp"
-        tools:layout_editor_absoluteY="17dp" />
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="17dp"
+        android:onClick="setVisible"
+        android:text="@string/visible"
+        app:layout_constraintBottom_toTopOf="@+id/editText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.192"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="264dp"
+        android:layout_height="17dp"
+        android:layout_marginBottom="128dp"
+        android:text="IP:"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.135"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button2"
+        app:layout_constraintVertical_bias="0.967" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
