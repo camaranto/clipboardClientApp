@@ -1,8 +1,10 @@
 package com.example.clipboardclientapp;
 
+import android.os.Handler;
+
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
-import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -15,19 +17,16 @@ import java.util.logging.Logger;
  */
 public class ReceptorTCP extends Thread {
 
-    private String LOCAL_IP;
-    private String LOCAL_HOST_NAME;
     private boolean isEnabled;
     private ServerSocket serverSocket;
     private int PORT;
-    private String TEXT;
     private messageHandler caller;
+    private Handler h;
     public ReceptorTCP(int port, messageHandler caller) throws UnknownHostException {
-        this.LOCAL_IP = "";
-        this.LOCAL_HOST_NAME = "";
         this.isEnabled = false;
         this.PORT = port;
         this.caller = caller;
+        this.h = new Handler();
     }
 
     public void enableReception(){
@@ -36,6 +35,7 @@ public class ReceptorTCP extends Thread {
     }
     public void disableReception(){
         isEnabled = false;
+
     }
 
     @Override
@@ -43,18 +43,23 @@ public class ReceptorTCP extends Thread {
         try {
             this.serverSocket=new ServerSocket(PORT);
             while(isEnabled){
-                try (Socket receivedSocket = serverSocket.accept()) {
+                try (final Socket receivedSocket = serverSocket.accept()) {
                     ObjectInputStream OIS = new ObjectInputStream(receivedSocket.getInputStream());
-
-                    switch(new String(OIS.readUTF().split("/")[0])){
+                    final String header = OIS.readUTF().split("/")[0];
+                    switch(header){
                         case "TEXT":
-                            String load = OIS.readUTF();
-                            caller.TextMessageReceiveFromClient(receivedSocket, load);
-                            break;
+                            final String load = OIS.readUTF();
+                            post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    caller.TextMessageReceiveFromClient(receivedSocket, load);
+                                }
+                            });
+                             break;
                         case "FILE":
 
                             break;
-                        case "IMG":
+                        case "IMGN":
 
                             break;
                         default:
@@ -63,26 +68,13 @@ public class ReceptorTCP extends Thread {
                     }
                     OIS.close();
                 }
-
             }
         } catch (IOException ex) {
             Logger.getLogger(ReceptorTCP.class.getName()).log(Level.SEVERE, null, ex);
         }
-
     }
 
-
-    public String getLOCAL_IP() {
-        return LOCAL_IP;
+    private void post(Runnable r){
+        h.post(r);
     }
-
-    public String getLOCAL_HOST_NAME() {
-        return LOCAL_HOST_NAME;
-    }
-
-    public String getReceivedText(){
-        return TEXT;
-    }
-
-
 }

@@ -11,4 +11,5 @@ public interface messageHandler {
     public void FileReceiveFromClient(Socket clientSocket, byte[] data);
     public void ImgReceivedFromClient(Socket clientSocket, byte[] data);
     public void failedToSendMessage(Socket clientSocket, byte[] data);
+    public void clientConnected(Socket clientSocket);
 }

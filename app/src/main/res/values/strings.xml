@@ -5,4 +5,10 @@
     <string name="send">SEND</string>
     <string name="sync">SYNC</string>
     <string name="visible">visible</string>
+    <string name="ip">IP:</string>
+    <string name="_8080">8080</string>
+    <string name="connect">connect</string>
+    <string name="receptorIP">192.168.1.54</string>
+    <string name="receptorPort">8080</string>
+    <string name="LocalPort">port:</string>
 </resources>

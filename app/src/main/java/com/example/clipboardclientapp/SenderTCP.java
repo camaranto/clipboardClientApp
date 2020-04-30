@@ -3,9 +3,12 @@ package com.example.clipboardclientapp;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,40 +35,44 @@ public class SenderTCP {
 
 
     public void send(String type, Object load){
-        if(client == null || client.isClosed())
-            caller.failedToSendMessage(client, (byte[])load);
+        //if(client == null || client.isClosed())
+        //    caller.failedToSendMessage(client, (byte[])load);
         try {
             ObjectOutputStream os =  new ObjectOutputStream(client.getOutputStream());
-            os.write((type + "/").getBytes());
-            os.flush();
             sendHandler(type, load, os);
+            os.close();
+            client.close();
         } catch (IOException ex) {
-            Logger.getLogger(SenderTCP.class.getName()).log(Level.SEVERE, null, ex);
+            caller.failedToSendMessage(client,load.toString().getBytes());
+            //Logger.getLogger(SenderTCP.class.getName()).log(Level.SEVERE, null, ex);
         }
 
     }
 
     private void sendHandler(String type, Object load, ObjectOutputStream os) throws IOException{
+        os.writeUTF((type + "/"));
+        os.flush();
         switch(type){
             case "TEXT":
-                os.write(load.toString().getBytes());
+                os.writeUTF(load.toString());
                 os.flush();
                 break;
             case "FILE":
 
                 break;
-            case "IMG":
+            case "IMGN":
 
                 break;
             default:
-                System.out.println("trash");
+                //System.out.println("trash");
         }
     }
 
+
     public boolean SYNC(){
-        if(!isSocketAlive(RECEPTOR_IP, LOCAL_PORT)){
-            return false;
-        }
+        //if(!isSocketAlive(RECEPTOR_IP, LOCAL_PORT)){
+        //    return false;
+        //}
         String HEADER = "";
         try {
             client = new Socket(RECEPTOR_IP, RECEPTOR_PORT);
@@ -81,6 +88,36 @@ public class SenderTCP {
         }
         return HEADER.equals("SYNC");
 
+    }
+
+    public void connect(){
+        try  {
+            this.client = new Socket(InetAddress.getByName(RECEPTOR_IP), RECEPTOR_PORT);
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void sendMessage(final String msg){
+        Thread msgSender = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try  {
+                    connect();
+                    OutputStream os = client.getOutputStream();
+                    send("TEXT", msg);
+                    os.close();
+                    client.close();
+                } catch (UnknownHostException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        msgSender.start();
     }
 
     public static boolean isSocketAlive(String hostName, int port) {

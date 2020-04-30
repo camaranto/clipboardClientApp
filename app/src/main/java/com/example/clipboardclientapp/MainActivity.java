@@ -6,35 +6,46 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
-import android.os.StrictMode;
+import android.os.Handler;
 import android.view.View;
-import android.widget.CompoundButton;
+import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.OutputStream;
 import java.net.InetAddress;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
 public class MainActivity extends AppCompatActivity implements messageHandler{
 
-    private final int PORT = 8080;
+    private int PORT;
+    EditText editText;
     EditText editText2;
+    EditText editText3;
+    EditText editText4;
     ReceptorTCP receptor;
     SenderTCP sender;
-    Switch switch1;
     TextView textView;
+    Button button5;
+    TextView textView4;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         this.editText2 = (EditText)findViewById(R.id.editText2);
-        this.switch1 = (Switch)findViewById(R.id.switch1);
         this.textView = (TextView)findViewById(R.id.textView);
+        this.button5 = (Button)findViewById(R.id.button5);
+        this.editText3 = (EditText)findViewById(R.id.editText3);
+        this.editText = (EditText)findViewById(R.id.editText);
+        this.editText4 = (EditText)findViewById(R.id.editText4);
+        this.textView4 = (TextView)findViewById(R.id.textView4);
         try {
-            this.receptor = new ReceptorTCP(PORT, this);
             WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
             int intAddr = wifiManager.getConnectionInfo().getIpAddress();
             byte[] byteaddr = new byte[] { (byte) (intAddr & 0xff), (byte) (intAddr >> 8 & 0xff), (byte) (intAddr >> 16 & 0xff), (byte) (intAddr >> 24 & 0xff) };
@@ -56,11 +67,12 @@ public class MainActivity extends AppCompatActivity implements messageHandler{
     }
 
     public void sendMessage(View view) {
-        // Do something in response to button
+        if(!editText2.getText().toString().isEmpty()) {
+            this.sender = new SenderTCP(editText.getText().toString(), Integer.parseInt(editText4.getText().toString()), this);
+            sender.sendMessage(editText2.getText().toString());
+        }
     }
-    public void sync(View view){
-        Toast.makeText(getApplicationContext(), "SYNC", Toast.LENGTH_SHORT).show();
-    }
+
     public void setStringToClipboard(String text){
         ClipboardManager clipboard = (ClipboardManager)getSystemService(getApplicationContext().CLIPBOARD_SERVICE);
         clipboard.setPrimaryClip(ClipData.newPlainText("Text",text));
@@ -74,28 +86,28 @@ public class MainActivity extends AppCompatActivity implements messageHandler{
         if(clipboard.hasPrimaryClip()){
             editText2.setText(getStringFromClipboard(clipboard), TextView.BufferType.NORMAL);
         }
-        //Toast.makeText(getApplicationContext(), clipboard.getPrimaryClip().getItemAt(0).getText(), Toast.LENGTH_SHORT).show();
     }
-    public void setVisible(View view){
-        switch1.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked){
-                    receptor.enableReception();
-                    Toast("visible", Toast.LENGTH_SHORT);
-                }else{
-                    receptor.disableReception();
-                }
+    public void setVisible(View view) throws UnknownHostException {
+        if(button5.getText().equals("connect")){
+            if(!editText3.getText().toString().isEmpty()){
+                receptor = new ReceptorTCP(Integer.parseInt(editText3.getText().toString()), this);
+                receptor.enableReception();
+                button5.setText("unconnect");
+                Toast("listening on port:"+ editText3.getText().toString(), Toast.LENGTH_SHORT);
+                textView4.setText("port:" + editText3.getText().toString());
             }
-        });
-
+        }else{
+            receptor.disableReception();
+            textView4.setText("port:");
+            button5.setText("connect");
+        }
     }
 
     @Override
-    public void TextMessageReceiveFromClient(Socket clientSocket, String data) {
+    public void TextMessageReceiveFromClient(Socket clientSocket,String data) {
         editText2.setText((CharSequence)data, TextView.BufferType.NORMAL);
         setStringToClipboard(data);
-        Toast("received from " + clientSocket.getInetAddress(), Toast.LENGTH_SHORT);
+        Toast("msg from ip:" + clientSocket.getInetAddress().getHostAddress(), Toast.LENGTH_SHORT);
     }
 
     @Override
@@ -110,6 +122,11 @@ public class MainActivity extends AppCompatActivity implements messageHandler{
 
     @Override
     public void failedToSendMessage(Socket clientSocket, byte[] data) {
+        Toast("failed to send message to " + clientSocket.getInetAddress().getHostAddress(), Toast.LENGTH_SHORT);
+    }
 
+    @Override
+    public void clientConnected(Socket clientSocket) {
+        Toast("client: " + clientSocket.getInetAddress().getHostAddress(), Toast.LENGTH_SHORT);
     }
 }
